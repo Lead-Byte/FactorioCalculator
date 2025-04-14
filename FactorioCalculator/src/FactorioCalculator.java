@@ -11,19 +11,19 @@ public class FactorioCalculator {
 
     public static void main(String[] args){
 
-        String requestedItem = "Electronic Circuit";
+        String requestedItem = "transport belt";
 
         double quantityRequested_perSecond = 10;
-        double quantityRequested_perMinute = quantityRequested_perSecond;
+        double quantityRequested_perMinute = 60*quantityRequested_perSecond;
 
 
         Path MaterialList = Path.of("Ressources", "MaterialList.txt");
-        String currentLine = "0";
+        String currentLine;
         int indexStopSymbol;
 
 
 
-        try (BufferedReader br = Files.newBufferedReader(MaterialList);) {
+        try (BufferedReader br = Files.newBufferedReader(MaterialList)) {
 
             currentLine = br.readLine();
             while (currentLine!=null) {
