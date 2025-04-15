@@ -4,13 +4,15 @@ import java.util.Map;
 public class Material {
 
 
-    private String name;
-    private double baseProductionTime;
-    private Map<String,Double> preRequisites;
+    final private String name;
+    final private double baseProductionTime;
+    final private ProductionType productionType;
+    final private Map<String,Double> preRequisites;
 
-    public Material(String name, double baseProductionTime, Map<String,Double> preRequisites){
+    public Material(String name, double baseProductionTime, ProductionType productionType, Map<String,Double> preRequisites){
         this.name = name;
         this.baseProductionTime = baseProductionTime;
+        this.productionType = productionType;
         this.preRequisites = preRequisites;
     }
 
@@ -21,6 +23,8 @@ public class Material {
     public double getBaseProductionTime(){
         return baseProductionTime;
     }
+
+    public ProductionType getProductionType() {return productionType;}
 
     public Map<String,Double> getPreRequisites() {
         return preRequisites;
@@ -49,25 +53,21 @@ public class Material {
     }
 
 
-    public static Map<String,Double> calculateProductionInfrastructure(Material material, Double quantityPerSecond, Double productionRateWorkshops, Double productionRateHarvesters) {
+    public static Map<String,Double> calculateProductionInfrastructure(Material material, Double quantityPerSecond) {
 
-        Map<String,Double> infrastructureMap = new HashMap<>();
+        Map<String, Double> infrastructureMap = new HashMap<>();
 
-        if (material.getPreRequisites().isEmpty()) {
-            double NumberOfHarvesters = (material.getBaseProductionTime()*quantityPerSecond)/(productionRateHarvesters);
-            infrastructureMap.put(material.getName(),NumberOfHarvesters);}
-        else {
 
-            double NumberOfWorkshops = (material.getBaseProductionTime()*quantityPerSecond)/(productionRateWorkshops);
-            infrastructureMap.put(material.getName(),NumberOfWorkshops);
+        double NumberOfProductionFacilities = (material.getBaseProductionTime() * quantityPerSecond) / (GlobalVariables.productionFactorMap.get(material.getProductionType()));
+        infrastructureMap.put(material.getName(), NumberOfProductionFacilities);
 
-            for (var m : material.getPreRequisites().keySet()) {
-                Map<String, Double> materialMapRecursive = calculateProductionInfrastructure(GlobalVariables.materialMap.get(m), quantityPerSecond*material.getPreRequisites().get(m),productionRateWorkshops,productionRateHarvesters);
-                materialMapRecursive.forEach((key, value) ->
-                        infrastructureMap.merge(key, value, Double::sum)
-                );
-            }
+        for (var m : material.getPreRequisites().keySet()) {
+            Map<String, Double> materialMapRecursive = calculateProductionInfrastructure(GlobalVariables.materialMap.get(m), quantityPerSecond * material.getPreRequisites().get(m));
+            materialMapRecursive.forEach((key, value) ->
+                    infrastructureMap.merge(key, value, Double::sum)
+            );
         }
+
         return infrastructureMap;
     }
 

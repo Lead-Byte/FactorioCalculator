@@ -11,17 +11,37 @@ public class FactorioCalculator {
 
     public static void main(String[] args){
 
-        String requestedItem = "transport belt";
-
-        double quantityRequested_perSecond = 10;
-        double quantityRequested_perMinute = 60*quantityRequested_perSecond;
+        String requestedItem = "cliff explosives";
 
 
-        Path MaterialList = Path.of("Ressources", "MaterialList.txt");
+
+        double quantityRequested_perSecond = 0.1;
+
+        double factorDriller = 0.6; //production per second needed
+        double factorFurnance = 2.0;
+        double factorWorkbench = 0.75;
+
+        double factorChemicalPlant = 1.0;
+        double factorOilRefinery = 1.0;
+        double factorPump = 1.0;
+        double factorPumpjack = 1.0;
+        double factorMultiple = 1.0;
+        double factorOther = 1.0;
+
+        GlobalVariables.productionFactorMap.put(ProductionType.DRILLER,factorDriller);
+        GlobalVariables.productionFactorMap.put(ProductionType.FURNANCE,factorFurnance);
+        GlobalVariables.productionFactorMap.put(ProductionType.WORKBENCH,factorWorkbench);
+        GlobalVariables.productionFactorMap.put(ProductionType.CHEMICALPLANT,factorChemicalPlant);
+        GlobalVariables.productionFactorMap.put(ProductionType.OILREFINERY,factorOilRefinery);
+        GlobalVariables.productionFactorMap.put(ProductionType.PUMP,factorPump);
+        GlobalVariables.productionFactorMap.put(ProductionType.PUMPJACK,factorPumpjack);
+        GlobalVariables.productionFactorMap.put(ProductionType.MULTIPLE,factorMultiple);
+        GlobalVariables.productionFactorMap.put(ProductionType.OTHER,factorOther);
+
+
+        Path MaterialList = Path.of("Ressources", "MaterialListAdvanced.txt");
         String currentLine;
         int indexStopSymbol;
-
-
 
         try (BufferedReader br = Files.newBufferedReader(MaterialList)) {
 
@@ -32,12 +52,16 @@ public class FactorioCalculator {
 
                 indexStopSymbol = currentLine.indexOf(";");
                 String materialName = currentLine.substring(0,indexStopSymbol);
-
                 currentLine = currentLine.substring(indexStopSymbol+1);
 
                 indexStopSymbol = currentLine.indexOf(";");
                 double materialBaseProductionTime = Double.parseDouble(currentLine.substring(0,indexStopSymbol));
+                currentLine = currentLine.substring(indexStopSymbol+1);
+
+                indexStopSymbol = currentLine.indexOf(";");
+                ProductionType productionType = ProductionType.valueOf(currentLine.substring(0,indexStopSymbol));
                 currentLine = currentLine.substring(indexStopSymbol);
+
 
                 while (currentLine.length() > 1) {
 
@@ -54,7 +78,7 @@ public class FactorioCalculator {
 
                 }
 
-                GlobalVariables.materialMap.put(materialName,new Material(materialName,materialBaseProductionTime,preRequisitesMap));
+                GlobalVariables.materialMap.put(materialName,new Material(materialName,materialBaseProductionTime,productionType,preRequisitesMap));
 
                 currentLine = br.readLine();
 
@@ -64,9 +88,9 @@ public class FactorioCalculator {
         } catch (IOException e) {e.printStackTrace();}
 
 
-        System.out.println(Material.calculateRequiredRawMaterials(GlobalVariables.materialMap.get(requestedItem),quantityRequested_perMinute));
+        System.out.println(Material.calculateRequiredRawMaterials(GlobalVariables.materialMap.get(requestedItem),quantityRequested_perSecond));
 
-        System.out.println(Material.calculateProductionInfrastructure(GlobalVariables.materialMap.get(requestedItem),quantityRequested_perSecond,2.0,0.6));
+        System.out.println(Material.calculateProductionInfrastructure(GlobalVariables.materialMap.get(requestedItem),quantityRequested_perSecond));
 
 
 
